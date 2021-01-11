@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import confusion_matrix, recall_score, precision_score, roc_auc_score, accuracy_score, auc
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.model_selection import train_test_split
 from sklearn.utils import resample
 from xgboost import XGBClassifier
@@ -65,12 +65,8 @@ dataset_X=pd.concat((dataset_full_0, dataset_full_1))
 Y=pd.concat((dataset_Y_0, dataset_Y_1))
 Y.value_counts()
 
-#standardization (Z-score)
+
 df=pd.concat((dataset_X, Y), axis=1)
-sc_0=StandardScaler()
-df[df['class']==0].iloc[:,:-1]=sc_0.fit_transform(df[df['class']==0].iloc[:,:-1])
-sc_1=StandardScaler()
-df[df['class']==1].iloc[:,:-1]=sc_0.fit_transform(df[df['class']==1].iloc[:,:-1])
 
 #multicollinearity (delete values)
 correlations_data_X=df.corr()
@@ -83,11 +79,19 @@ for i in correlations_data_X:
 for i in CorField:
   del df[i]
 
+#standardization (Z-score)
+sc = MinMaxScaler()
+df.loc[:,df.columns[:-1]] = sc.fit_transform(df.loc[:,df.columns[:-1]])
+
 X=df.iloc[:,:-1]
-Y=df.iloc[:,47]
+Y=df.iloc[:,df.shape[1]-1]
+
 
 #split into the train and test
 X_train, X_test, Y_train, Y_test=train_test_split(X, Y, random_state=0)
+
+
+#X_train[Y_train==1]
 
 X = pd.concat([X_train, Y_train], axis=1)
 not_bad=X[X['class']==0]
@@ -104,6 +108,11 @@ X_train=upsampled.iloc[:,:-1]
 Y_train=upsampled.iloc[:,-1]
 Y_train=Y_train.astype(int)
 Y_test=Y_test.astype(int)
+
+
+plt.pie(Y_train.value_counts(),autopct='%.1f')
+plt.title('Розподіл класів у % значенні')
+plt.legend(labels=np.unique(dataset_full['class']))
 
 #fitting the models (Logistic Regression, Random Forest, XGBoost)
 ######### model 1 - LogisticRegression
