@@ -79,7 +79,7 @@ for i in correlations_data_X:
 for i in CorField:
   del df[i]
 
-#standardization (Z-score)
+#normalization
 sc = MinMaxScaler()
 df.loc[:,df.columns[:-1]] = sc.fit_transform(df.loc[:,df.columns[:-1]])
 
