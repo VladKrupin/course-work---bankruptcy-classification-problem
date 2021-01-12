@@ -86,18 +86,13 @@ df.loc[:,df.columns[:-1]] = sc.fit_transform(df.loc[:,df.columns[:-1]])
 X=df.iloc[:,:-1]
 Y=df.iloc[:,df.shape[1]-1]
 
-
 #split into the train and test
 X_train, X_test, Y_train, Y_test=train_test_split(X, Y, random_state=0)
 
-
-#X_train[Y_train==1]
-
+#resampling
 X = pd.concat([X_train, Y_train], axis=1)
 not_bad=X[X['class']==0]
 bad=X[X['class']==1]
-
-#resampling
 bad_unsampled = resample(bad,
                           replace=True,
                           n_samples=len(not_bad),
